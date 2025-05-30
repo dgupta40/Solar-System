@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Star System</title>
+<style>
+  body{margin:0;background:#000;color:#fff;display:flex;flex-direction:column;
+       align-items:center;justify-content:center;height:100vh;font-family:sans-serif;
+       overflow:hidden} 
+  
+  #gl-canvas{
+    display: block;
+    width: 100vw;   
+    height: 100vh;  
+  }
+  
+  #controls{
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size:14px;
+    text-align:center;
+    z-index: 10;
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  #speedSlider{width:300px}
+  .control-group{margin:5px 0;display:flex;align-items:center;justify-content:center;gap:10px}
+  label{cursor:pointer}
+</style>
+</head>
+
+<!-- vertex shader -->
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+in  vec4 aPosition;
+in  vec4 aColor;
+in  vec2 aTexCoord;          
+out vec4 vColor;
+out vec2 vTexCoord;         
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+void main () {
+    gl_Position = projectionMatrix * modelViewMatrix * aPosition;
+    gl_PointSize = 0.5;  // Set star point size
+    vColor      = aColor;
+    vTexCoord   = aTexCoord;
+}
+</script>
+
+<!-- fragment shader -->
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+precision mediump float;
+in  vec4 vColor;
+in  vec2 vTexCoord;
+uniform sampler2D uTexture;
+uniform int       uUseTexture;
+out vec4 fColor;
+
+void main () {
+    if (uUseTexture == 1) {
+        vec2 uv = vTexCoord;
+        uv.x = fract(uv.x);
+        fColor = texture(uTexture, uv);
+    } else {
+        fColor = vColor;
+    }
+}
+</script>
+
+<script src="../Common/flatten.js"></script>     
+<script src="../Common/MVnew.js"></script>       
+<script src="../Common/initShaders.js"></script> 
+<script src="Sphere.js"></script>                
+<script src="script.js"></script>                
+
+<body>
+<canvas id="gl-canvas">
+  Your browser doesn't support the HTML5 canvas element.
+</canvas>
+
+<div id="controls">
+  <div class="control-group">
+    Speed&nbsp;
+    <input id="speedSlider" type="range" min="0.1" max="5" step="0.1" value="1">
+    <span id="speedLabel">1.0&nbsp;x</span>
+  </div>
+  
+  <div class="control-group">
+    <label>
+      <input type="checkbox" id="ringToggle" checked>
+      Show Orbital Rings
+    </label>
+  </div>
+</div>
+</body>
+</html>
